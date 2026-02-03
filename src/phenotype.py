@@ -114,7 +114,7 @@ def phenotype_opaque_population(population: list[Genotype] | np.ndarray, phenoty
     if mask is None: mask = np.ones(population.shape[0], dtype=bool)
     for i,individual in enumerate(population):
         if mask[i]:
-            phenotypes[i] = phenotype_opaque_population(individual,image_data,detail)
+            phenotypes[i] = phenotype_opaque(individual,image_data,detail)
     #return phenotypes
 
 def phenotype_opaque(genotype: Genotype | np.ndarray, image_data: tuple[int,int], detail: float=1) -> np.ndarray:

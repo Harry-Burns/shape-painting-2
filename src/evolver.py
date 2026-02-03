@@ -3,9 +3,9 @@ import numpy as np
 import cv2
 
 from src.genotype import Genotype
-from src.phenotype import phenotype_population
+from src.phenotype import phenotype_population, phenotype_opaque_population
 
-from src.evaluate import evaluate_iter, evaluate
+from src.evaluate import evaluate
 from src.selection import select_parents, crossover, mutate
 from src.display import display_n_with_stats
 
