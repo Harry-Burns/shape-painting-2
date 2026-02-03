@@ -41,10 +41,6 @@ def display_n_with_stats(
     if not imgs:
         return
 
-    # ---- update history (mutable list passed in) ----
-    if (best_fitness is not None) and (fitness_hist is not None):
-        fitness_hist.append(float(best_fitness))
-
     # ---- normalise/convert to BGR ----
     proc = []
     for x in imgs:

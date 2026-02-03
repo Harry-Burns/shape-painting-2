@@ -2,66 +2,51 @@ import numpy as np
 
 from src.genotype import Genotype
 
-def select_and_mutate(population: np.ndarray, rankings: np.ndarray, elite_num: int=0) -> np.ndarray:
-    if population.shape[0] != len(rankings):    raise ValueError(f"select_and_mutate: population and evaluation lists must be the same length. Received {population.shape[0]}, {len(rankings)}")
-    if elite_num > population.shape[0]:         raise ValueError(f"Can't have more elites than population size. Received pop: {population.shape[0]}, elite_num: {elite_num}")
-    
-    N = population.shape[0]
+# region Parent Selection
+def select_parents(rankings: np.ndarray) -> np.ndarray:
+    N = len(rankings)
+    mask = tournament_selection_mask(rankings, target_n=int(N / 3))
+    return mask
 
-
-    elite_idx = np.argpartition(rankings, elite_num)[:elite_num]
-    elites = population[elite_idx] if elite_num > 0 else population[:0]
-    elite_idx = np.arange(elites.shape[0], dtype=np.uint32) if elite_num > 0 else None    
-
-    
-    parents = population[tournament_selection_mask(rankings, n_select= int(N / 3))]
-
-    if parents.shape[0] < 2: parents = population[np.argpartition(rankings, 1)[:2]]; print("Not enough parents selected, instead using the top 2 as parents.")
-    
-    children = crossover(parents, population_size=(N - elite_num))
-    children = mutation(children)
-
-    population_out = children if elite_num == 0 else np.concatenate([elites, children], axis=0)
-
-    return population_out, elite_idx
-
-
-def tournament_selection_mask(rankings: np.ndarray, n_select: int, k: int=2) -> np.ndarray:
+def tournament_selection_mask(rankings: np.ndarray, target_n: int, k: int=2) -> np.ndarray:
     N = len(rankings)
     selected = np.zeros(N, dtype=bool)
 
-    for _ in range(n_select):
+    for _ in range(target_n):
         idx = np.random.choice(N, size=k, replace=False)
         winner = idx[np.argmin(rankings[idx])]  # lower rank = better
         selected[winner] = True
 
     return selected
+# endregion
 
-def crossover(parents, population_size):
+# region Crossover
+def crossover(parents, num_children):
+    return uniform_crossover(parents,num_children)
+
+def uniform_crossover(parents, num_children):
     P, G, D = parents.shape
 
     if P < 2: raise ValueError("crossover: need at least 2 parents")
+    if num_children < 1: raise ValueError("crossover: need num_children > 0")
 
     # pick two parents per child
-    p1 = np.random.randint(0, P, size=population_size)
-    p2 = np.random.randint(0, P, size=population_size)
+    p1 = np.random.randint(0, P, size=num_children)
+    p2 = np.random.randint(0, P, size=num_children)
 
     a = parents[p1]  # (M, G, D)
     b = parents[p2]  # (M, G, D)
 
     # per-gene mask (whole 7-vector copied from one parent or the other)
-    m = (np.random.rand(population_size, G, 1) < 0.5)
+    m = (np.random.rand(num_children, G, 1) < 0.5)
     children = np.where(m, a, b)
 
-    # since gene order is irrelevant, randomise gene order in each child
-    # (prevents positional bias from being learned accidentally)
-    out = np.empty_like(children)
-    for i in range(population_size):
-        out[i] = children[i]
+    return children
+# endregion
 
-    return out
 
-def mutation(population: np.ndarray) -> np.ndarray:
+# region Mutation
+def mutate(population: np.ndarray) -> np.ndarray:
     N, G, D = population.shape # population, num_genes, things_per_gene
 
     pop_rate=0.3; 
@@ -101,8 +86,9 @@ def mutation(population: np.ndarray) -> np.ndarray:
             x[i, g] = gene
 
         # keep gene-order invariance
-        perm = np.random.permutation(G)
-        x[i] = x[i, perm]
+        #perm = np.random.permutation(G)
+        #x[i] = x[i, perm]
 
     np.clip(x, 0.0, 1.0, out=x)
     return x
+# endregion

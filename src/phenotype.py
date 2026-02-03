@@ -12,6 +12,14 @@ cv2.ocl.setUseOpenCL(False)
 #       2.2. This means each gene (row) in the np array will be 1+1+2+2+1 long
 
 
+# region Main Phenotype code
+def phenotype_population(population: list[Genotype] | np.ndarray, phenotypes: np.ndarray, image_data: tuple[int,int], mask: np.ndarray | None=None, detail: float=1):
+    if mask is None: mask = np.ones(population.shape[0], dtype=bool)
+    for i,individual in enumerate(population):
+        if mask[i]:
+            phenotypes[i] = phenotype(individual,image_data,detail)
+    #return phenotypes
+
 def phenotype(genotype: Genotype | np.ndarray, image_data: tuple[int,int], detail: float=1) -> np.ndarray:
     if isinstance(genotype, Genotype): genes = genotype.genes 
     else: genes = genotype
@@ -98,10 +106,17 @@ def draw_circle(img_bgr, mask_buf, radius, ratio, posx, posy, col_bgr, alpha):
 
     out = dst * (1.0 - a) + src * a        # a is (H,W)
     region_of_interest[:] = np.clip(out, 0, 255).astype(np.uint8)
-
+# endregion
 
 
 # region Opaque Experiment
+def phenotype_opaque_population(population: list[Genotype] | np.ndarray, phenotypes: np.ndarray, image_data: tuple[int,int], mask: np.ndarray | None=None, detail: float=1):
+    if mask is None: mask = np.ones(population.shape[0], dtype=bool)
+    for i,individual in enumerate(population):
+        if mask[i]:
+            phenotypes[i] = phenotype_opaque_population(individual,image_data,detail)
+    #return phenotypes
+
 def phenotype_opaque(genotype: Genotype | np.ndarray, image_data: tuple[int,int], detail: float=1) -> np.ndarray:
     if isinstance(genotype, Genotype): genes = genotype.genes 
     else: genes = genotype
