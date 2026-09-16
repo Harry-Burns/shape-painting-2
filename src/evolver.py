@@ -9,7 +9,7 @@ from src.evaluate import evaluate
 from src.selection import select_parents, crossover, mutate
 from src.display import display_n_with_stats
 
-POPULATION_SIZE = 256
+POPULATION_SIZE = 128
 MAX_ITER = 64000
 
 #EVOLVE_ITER = {

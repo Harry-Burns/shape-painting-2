@@ -8,7 +8,7 @@ class Genotype:
     #       2.1. Size, w/h ratio, position (x, y), color (greyscale/rgb + opacity), index drawing order
     #       2.2. This means each gene (row) in the np array will be 1+1+2+2+1 long
 
-    max_genes = 128
+    max_genes = 64
     gene_shape = (max_genes,7)
 
     def __init__(self, genes: np.ndarray=None):
